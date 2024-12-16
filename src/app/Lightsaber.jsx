@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import { useFrame, extend } from "@react-three/fiber";
-import { Effects, Sparkles, useGLTF } from "@react-three/drei";
+import { Sparkles, useGLTF } from "@react-three/drei";
 import { UnrealBloomPass } from "three-stdlib";
 
 extend({ UnrealBloomPass });
@@ -15,7 +15,9 @@ export default function Lightsaber({ bladeColor, isOpen, onOpenSound }) {
   const prevIsOpen = useRef(isOpen);
 
   // Load the GLB file
-  const { scene } = useGLTF("/lightsaber-hilt.glb");
+  const { scene } = useGLTF(
+    `${process.env.NEXT_PUBLIC_BASE_PATH}/models/lightsaber-hilt.glb`
+  );
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
@@ -66,7 +68,7 @@ export default function Lightsaber({ bladeColor, isOpen, onOpenSound }) {
           <capsuleGeometry args={[0.05, 3, 32, 32]} />
           <meshStandardMaterial
             emissive={bladeColor}
-            emissiveIntensity={5.0}
+            emissiveIntensity={isOpen ? 5.0 : 0.0}
             toneMapped={false}
           />
         </mesh>

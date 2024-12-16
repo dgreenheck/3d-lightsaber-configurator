@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown, Palette, Wrench, Power } from "lucide-react";
+import { Palette, Wrench, Power } from "lucide-react";
 import Scene from "./Scene";
 
 const hiltMaterials = [
@@ -14,20 +12,12 @@ const hiltMaterials = [
   { name: "Brylark", value: "wood", color: "#8B4513" },
 ];
 
-const bladeColors = [
-  { name: "Sith Red", value: "#FF0000" },
-  { name: "Jedi Blue", value: "#0000FF" },
-  { name: "Mace Windu Purple", value: "#800080" },
-  { name: "Luke Skywalker Green", value: "#00FF00" },
-  { name: "Temple Guard Yellow", value: "#FFFF00" },
-];
-
-const circleColors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"];
+const bladeColors = ["#c08080", "#60b060", "#45B7D1", "#c080d0", "#a0a040"];
 
 //https://www.dafont.com/star-jedi.font
 
 export default function LightsaberConfigurator() {
-  const [bladeColor, setBladeColor] = useState(bladeColors[0].value);
+  const [bladeColor, setBladeColor] = useState(bladeColors[0]);
   const [hiltMaterial, setHiltMaterial] = useState("metal");
   const [isOpen, setIsOpen] = useState(false);
   const [activeButton, setActiveButton] = useState(null);
@@ -65,7 +55,7 @@ export default function LightsaberConfigurator() {
                 className="absolute bottom-full mb-4 left-1/2 transform -translate-x-1/2"
               >
                 <div className="flex flex-col-reverse space-y-2 space-y-reverse">
-                  {circleColors.map((color, index) => (
+                  {bladeColors.map((color, index) => (
                     <motion.button
                       key={color}
                       className="w-10 h-10 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100"
