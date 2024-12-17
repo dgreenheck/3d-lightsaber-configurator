@@ -28,8 +28,6 @@ export function playAudio(
   source.buffer = buffer;
   source.loop = loop;
 
-  console.log(gain);
-
   gainNode.gain.setValueAtTime(gain, audioContext.currentTime);
 
   // Connect nodes

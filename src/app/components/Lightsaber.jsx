@@ -4,32 +4,29 @@ import { useState, useRef, useEffect } from "react";
 import { useFrame, extend } from "@react-three/fiber";
 import { Sparkles, useGLTF } from "@react-three/drei";
 import { UnrealBloomPass } from "three-stdlib";
-import { loadAudio, playAudio } from "../utils/audio";
+import { loadAudio, playAudio } from "../../utils/audio";
 
 extend({ UnrealBloomPass });
 
-export default function Lightsaber({ bladeColor, isOpen }) {
+export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
+  const hiltModel = useGLTF(hiltStyle.url);
+
   const bladeRef = useRef();
   const hiltRef = useRef();
   const bladeLightRef = useRef();
 
   const prevIsOpen = useRef(isOpen);
   const previousMousePos = useRef({ x: 0, y: 0 });
-  const threshold = 20; // Movement threshold to trigger sound
+  const threshold = 30; // Movement threshold to trigger sound
 
   const [openSound, setOpenSound] = useState(null);
   const [closeSound, setCloseSound] = useState(null);
-  const [hummingSound, setHummingSound] = useState(null);
+  const [humSound, setHumSound] = useState(null);
   const [swingSound, setSwingSound] = useState(null);
-  const isMouseDown = useRef(false);
-
   const currentAudioSource = useRef(null); // Reference to current playing sound
-  const isSwinging = useRef(null);
 
-  // Load the GLB file
-  const { scene } = useGLTF(
-    `${process.env.NEXT_PUBLIC_BASE_PATH}/models/lightsaber-hilt.glb`
-  );
+  const isSwinging = useRef(null);
+  const isMouseDown = useRef(false);
 
   useEffect(() => {
     const handleMouseDown = () => (isMouseDown.current = true);
@@ -46,15 +43,25 @@ export default function Lightsaber({ bladeColor, isOpen }) {
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
+    const openSpeed = 0.05;
+    const closeSpeed = 0.02;
 
     if (isOpen) {
-      bladeRef.current.scale.y = Math.min(1, bladeRef.current.scale.y + 0.01);
+      bladeRef.current.scale.y = Math.min(
+        1,
+        bladeRef.current.scale.y + openSpeed
+      );
       bladeRef.current.position.y = Math.min(1.5, bladeRef.current.position.y);
     } else {
-      bladeRef.current.scale.y = Math.max(0, bladeRef.current.scale.y - 0.01);
+      bladeRef.current.scale.y = Math.max(
+        0,
+        bladeRef.current.scale.y - closeSpeed
+      );
       bladeRef.current.position.y =
-        Math.max(1, bladeRef.current.position.y) - 0.01;
+        Math.max(1, bladeRef.current.position.y) - closeSpeed;
     }
+
+    bladeLightRef.current.visible = bladeRef.current.scale.y > 0;
   });
 
   // Load audio
@@ -68,8 +75,8 @@ export default function Lightsaber({ bladeColor, isOpen }) {
     ).then(setCloseSound);
 
     loadAudio(
-      `${process.env.NEXT_PUBLIC_BASE_PATH}/audio/lightsaber-humming.mp3`
-    ).then(setHummingSound);
+      `${process.env.NEXT_PUBLIC_BASE_PATH}/audio/lightsaber-hum.mp3`
+    ).then(setHumSound);
 
     loadAudio(
       `${process.env.NEXT_PUBLIC_BASE_PATH}/audio/lightsaber-swing.mp3`
@@ -77,11 +84,11 @@ export default function Lightsaber({ bladeColor, isOpen }) {
   }, []);
 
   useEffect(() => {
-    if (!openSound || !hummingSound || !closeSound) return;
+    if (!openSound || !humSound || !closeSound) return;
 
     if (!prevIsOpen.current && isOpen) {
       playAudio(openSound);
-      currentAudioSource.current = playAudio(hummingSound, 0.2, true);
+      currentAudioSource.current = playAudio(humSound, 0.2, true);
     } else if (prevIsOpen.current && !isOpen) {
       if (currentAudioSource.current) {
         currentAudioSource.current.stop();
@@ -107,7 +114,6 @@ export default function Lightsaber({ bladeColor, isOpen }) {
 
     // Calculate movement delta
     const deltaX = Math.abs(currentMousePos.x - previousMousePos.current.x);
-    const deltaY = Math.abs(currentMousePos.y - previousMousePos.current.y);
 
     if (deltaX > threshold && !isSwinging.current && isMouseDown.current) {
       isSwinging.current = true;
@@ -121,28 +127,10 @@ export default function Lightsaber({ bladeColor, isOpen }) {
     previousMousePos.current = currentMousePos;
   });
 
-  useEffect(() => {
-    if (hiltRef) {
-      hiltRef.current.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-        }
-      });
-    }
-  }, [hiltRef]);
-
   return (
     <group position={[0, 0, 0]} rotation={[0.3, 0, 0]}>
-      <pointLight
-        ref={bladeLightRef}
-        position={[0, 1.5, 0]}
-        color={bladeColor}
-        intensity={50.0}
-        decay={3}
-        castShadows
-      />
-
-      <primitive ref={hiltRef} object={scene} scale={0.01} castShadow />
+      {/* Hilt */}
+      <primitive ref={hiltRef} object={hiltModel.scene} />
 
       {/* Blade */}
       <group ref={bladeRef}>
@@ -155,6 +143,15 @@ export default function Lightsaber({ bladeColor, isOpen }) {
           />
         </mesh>
       </group>
+
+      {/* Blade emissive light */}
+      <pointLight
+        ref={bladeLightRef}
+        position={[0, 1.5, 0]}
+        color={bladeColor}
+        intensity={50.0}
+        decay={3}
+      />
 
       <group position={[0, 2.5, 0]}>
         <Sparkles
