@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Palette, Wrench, Power } from "lucide-react";
 import Scene from "./Scene";
+import { Canvas } from "@react-three/fiber";
 
 const hiltMaterials = [
   { name: "Durasteel", value: "metal", color: "#8c8c8c" },
@@ -29,11 +30,18 @@ export default function LightsaberConfigurator() {
   return (
     <main className="h-screen relative">
       {/* React Three Fiber scene */}
-      <Scene
-        bladeColor={bladeColor}
-        hiltMaterial={hiltMaterial}
-        isOpen={isOpen}
-      />
+      <div className="w-full md:h-full bg-black">
+        <Canvas
+          camera={{ position: [0, 2, 7], fov: 50, near: 0.1, far: 1000 }}
+          shadows
+        >
+          <Scene
+            bladeColor={bladeColor}
+            hiltMaterial={hiltMaterial}
+            isOpen={isOpen}
+          />
+        </Canvas>
+      </div>
 
       {/* Buttons at the bottom */}
       <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-4">

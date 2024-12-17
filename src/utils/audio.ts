@@ -15,10 +15,40 @@ export async function loadAudio(url: string): Promise<AudioBuffer> {
   return await audioContext.decodeAudioData(arrayBuffer);
 }
 
-export function playAudio(buffer: AudioBuffer): void {
+export function playAudio(
+  buffer: AudioBuffer,
+  gain: number = 1,
+  loop: boolean = false,
+  onEnded?: (ev: Event) => any
+): AudioBufferSourceNode {
   const audioContext = getAudioContext();
+  const gainNode = audioContext.createGain();
   const source = audioContext.createBufferSource();
+
   source.buffer = buffer;
-  source.connect(audioContext.destination);
+  source.loop = loop;
+
+  console.log(gain);
+
+  gainNode.gain.setValueAtTime(gain, audioContext.currentTime);
+
+  // Connect nodes
+  source.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  const cleanUp = () => {
+    source.removeEventListener("ended", onSourceEnded);
+    source.disconnect();
+    gainNode.disconnect();
+  };
+
+  const onSourceEnded = (ev: Event) => {
+    cleanUp();
+    if (onEnded) onEnded(ev);
+  };
+
+  source.addEventListener("ended", onSourceEnded);
   source.start();
+
+  return source;
 }
