@@ -44,7 +44,7 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     const openSpeed = 0.05;
-    const closeSpeed = 0.02;
+    const closeSpeed = 0.01;
 
     if (isOpen) {
       bladeRef.current.scale.y = Math.min(
@@ -62,6 +62,11 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
     }
 
     bladeLightRef.current.visible = bladeRef.current.scale.y > 0;
+
+    if (bladeRef.current) {
+      bladeRef.current.children[0].material.emissiveIntensity =
+        bladeRef.current.scale.y > 0 ? 5.0 : 0.0;
+    }
   });
 
   // Load audio
@@ -83,6 +88,7 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
     ).then(setSwingSound);
   }, []);
 
+  // Audio settings
   useEffect(() => {
     if (!openSound || !humSound || !closeSound) return;
 
@@ -103,7 +109,7 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
 
   // Track mouse movement and play sound if threshold is exceeded
   useFrame((state) => {
-    if (!swingSound) return;
+    if (!swingSound || !isOpen) return;
 
     const { pointer } = state; // Normalized mouse position (-1 to 1)
 

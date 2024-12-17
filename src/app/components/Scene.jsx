@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, Suspense } from "react";
+import { useRef, Suspense, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
   Bloom,
@@ -15,10 +15,19 @@ import {
   MeshReflectorMaterial,
 } from "@react-three/drei";
 import Lightsaber from "./Lightsaber";
+import { loadAudio, playAudio } from "@/utils/audio";
 
 export default function Scene({ bladeColor, hiltStyle, isOpen }) {
   const spotlightRef = useRef();
   const bloomRef = useRef();
+
+  useEffect(() => {
+    loadAudio(
+      `${process.env.NEXT_PUBLIC_BASE_PATH}/audio/spaceship-ambience.mp3`
+    ).then((sound) => {
+      playAudio(sound, 0.5);
+    });
+  });
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
