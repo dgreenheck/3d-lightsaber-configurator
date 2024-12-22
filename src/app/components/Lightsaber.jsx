@@ -8,14 +8,14 @@ import { loadAudio, playAudio } from "../../utils/audio";
 
 extend({ UnrealBloomPass });
 
-export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
+export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
   const hiltModel = useGLTF(hiltStyle.url);
 
   const bladeRef = useRef();
   const hiltRef = useRef();
   const bladeLightRef = useRef();
 
-  const prevIsOpen = useRef(isOpen);
+  const prevIsOn = useRef(isOn);
   const previousMousePos = useRef({ x: 0, y: 0 });
   const threshold = 30; // Movement threshold to trigger sound
 
@@ -42,26 +42,18 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
   }, []);
 
   useFrame((state) => {
-    const t = state.clock.getElapsedTime();
     const openSpeed = 0.05;
     const closeSpeed = 0.01;
 
-    if (isOpen) {
-      bladeRef.current.scale.y = Math.min(
-        1,
-        bladeRef.current.scale.y + openSpeed
-      );
-      bladeRef.current.position.y = Math.min(1.5, bladeRef.current.position.y);
+    const scale = bladeRef.current.scale;
+
+    if (isOn) {
+      scale.y = Math.min(1, scale.y + openSpeed);
     } else {
-      bladeRef.current.scale.y = Math.max(
-        0,
-        bladeRef.current.scale.y - closeSpeed
-      );
-      bladeRef.current.position.y =
-        Math.max(1, bladeRef.current.position.y) - closeSpeed;
+      scale.y = Math.max(0, scale.y - closeSpeed);
     }
 
-    bladeLightRef.current.visible = bladeRef.current.scale.y > 0;
+    bladeLightRef.current.intensity = scale.y * 1000;
 
     if (bladeRef.current) {
       bladeRef.current.children[0].material.emissiveIntensity =
@@ -92,10 +84,10 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
   useEffect(() => {
     if (!openSound || !humSound || !closeSound) return;
 
-    if (!prevIsOpen.current && isOpen) {
+    if (!prevIsOn.current && isOn) {
       playAudio(openSound);
       currentAudioSource.current = playAudio(humSound, 0.2, true);
-    } else if (prevIsOpen.current && !isOpen) {
+    } else if (prevIsOn.current && !isOn) {
       if (currentAudioSource.current) {
         currentAudioSource.current.stop();
       }
@@ -104,12 +96,12 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
       });
     }
 
-    prevIsOpen.current = isOpen;
-  }, [isOpen]);
+    prevIsOn.current = isOn;
+  }, [isOn]);
 
   // Track mouse movement and play sound if threshold is exceeded
   useFrame((state) => {
-    if (!swingSound || !isOpen) return;
+    if (!swingSound || !isOn) return;
 
     const { pointer } = state; // Normalized mouse position (-1 to 1)
 
@@ -139,23 +131,18 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
       <primitive ref={hiltRef} object={hiltModel.scene} />
 
       {/* Blade */}
-      <group ref={bladeRef}>
+      <group ref={bladeRef} position={[0, 0.95, 0]} scale={[1, 0, 1]}>
         <mesh position={[0, 1.5, 0]}>
           <capsuleGeometry args={[0.05, 3, 32, 32]} />
-          <meshStandardMaterial
-            emissive={bladeColor}
-            emissiveIntensity={5.0}
-            toneMapped={false}
-          />
+          <meshStandardMaterial emissive={bladeColor} />
         </mesh>
       </group>
 
-      {/* Blade emissive light */}
       <pointLight
         ref={bladeLightRef}
-        position={[0, 1.5, 0]}
+        position={[0, 3, 0]}
         color={bladeColor}
-        intensity={50.0}
+        intensity={1000.0}
         decay={3}
       />
 
@@ -163,7 +150,7 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOpen }) {
         <Sparkles
           count={100}
           speed={1}
-          opacity={isOpen ? 0.5 : 0}
+          opacity={isOn ? 0.5 : 0}
           color={0xffffff}
           scale={[0.3, 3, 0.3]}
           noise={[10, 10, 10]}

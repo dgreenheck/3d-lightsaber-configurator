@@ -17,15 +17,14 @@ import {
 import Lightsaber from "./Lightsaber";
 import { loadAudio, playAudio } from "@/utils/audio";
 
-export default function Scene({ bladeColor, hiltStyle, isOpen }) {
-  const spotlightRef = useRef();
+export default function Scene({ bladeColor, hiltStyle, isOn }) {
   const bloomRef = useRef();
 
   useEffect(() => {
     loadAudio(
       `${process.env.NEXT_PUBLIC_BASE_PATH}/audio/spaceship-ambience.mp3`
     ).then((sound) => {
-      playAudio(sound, 0.5);
+      //playAudio(sound, 0.5);
     });
   });
 
@@ -38,40 +37,19 @@ export default function Scene({ bladeColor, hiltStyle, isOpen }) {
 
   return (
     <>
-      <Lightsaber
-        bladeColor={bladeColor}
-        hiltStyle={hiltStyle}
-        isOpen={isOpen}
-      />
+      <Lightsaber bladeColor={bladeColor} hiltStyle={hiltStyle} isOn={isOn} />
 
-      <Suspense fallback={null}>
-        <Environment
-          background={true} // can be true, false or "only" (which only sets the background) (default: false)
-          backgroundIntensity={0.6} // optional intensity factor (default: 1, only works with three 0.163 and up)
-          environmentIntensity={1} // optional intensity factor (default: 1, only works with three 0.163 and up)
-          files={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/environment.jpg`}
-          // Ensure the environment is on the default layer
-          onLoad={(env) => env.scene.layers.set(0)}
-        />
-      </Suspense>
+      <Environment
+        background={true} // can be true, false or "only" (which only sets the background) (default: false)
+        backgroundIntensity={0.8} // optional intensity factor (default: 1, only works with three 0.163 and up)
+        environmentIntensity={2} // optional intensity factor (default: 1, only works with three 0.163 and up)
+        files={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/environment.jpg`}
+        // Ensure the environment is on the default layer
+        onLoad={(env) => env.scene.layers.set(0)}
+      />
 
       {/* Lighting */}
-      <ambientLight intensity={0.2} />
-
-      <spotLight
-        ref={spotlightRef}
-        intensity={30.0}
-        position={[0, 5, 0]}
-        distance={10}
-        angle={1.5}
-        decay={2.1}
-        penumbra={1.0}
-        castShadow
-        shadow-mapSize-width={256}
-        shadow-mapSize-height={256}
-        shadow-camera-near={0.1}
-        shadow-camera-far={15}
-      />
+      <ambientLight intensity={2.0} />
 
       {/* Camera controls */}
       <OrbitControls

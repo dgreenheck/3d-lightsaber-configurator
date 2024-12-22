@@ -10,17 +10,14 @@ import { Canvas } from "@react-three/fiber";
 const hiltStyles = [
   {
     name: "Type A",
-    style: "lightsaber1",
     url: `${process.env.NEXT_PUBLIC_BASE_PATH}/models/lightsaber1.glb`,
   },
   {
     name: "Type B",
-    style: "lightsaber2",
     url: `${process.env.NEXT_PUBLIC_BASE_PATH}/models/lightsaber2.glb`,
   },
   {
     name: "Type C",
-    style: "lightsaber3",
     url: `${process.env.NEXT_PUBLIC_BASE_PATH}/models/lightsaber3.glb`,
   },
 ];
@@ -32,7 +29,7 @@ const bladeColors = ["#c08080", "#60b060", "#45B7D1", "#c080d0", "#a0a040"];
 export default function App() {
   const [bladeColor, setBladeColor] = useState(bladeColors[0]);
   const [hiltStyle, setHiltStyle] = useState(hiltStyles[0]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOn, setIsOn] = useState(false);
   const [activeButton, setActiveButton] = useState(null);
 
   const toggleButton = (button) => {
@@ -43,15 +40,9 @@ export default function App() {
     <main className="h-screen relative">
       {/* React Three Fiber scene */}
       <div className="w-full md:h-full bg-black">
-        <Canvas
-          camera={{ position: [0, 2, 7], fov: 50, near: 0.1, far: 1000 }}
-          shadows
-        >
-          <Scene
-            bladeColor={bladeColor}
-            hiltStyle={hiltStyle}
-            isOpen={isOpen}
-          />
+        <Canvas camera={{ position: [0, 2, 5] }}>
+          <color attach="background" args={["#003050"]} />
+          <Scene bladeColor={bladeColor} hiltStyle={hiltStyle} isOn={isOn} />
         </Canvas>
       </div>
 
@@ -59,9 +50,9 @@ export default function App() {
       <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center space-x-6 z-30">
         {/* Power button */}
         <Button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsOn(!isOn)}
           className={`bg-blue-900/30 hover:bg-blue-800/30 text-cyan-300 border border-cyan-400 rounded-full transition-all duration-300 backdrop-blur-md w-16 h-16 ${
-            isOpen ? "animate-pulse" : ""
+            isOn ? "animate-pulse" : ""
           }`}
         >
           <Power />
