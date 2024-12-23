@@ -31,8 +31,8 @@ export default function Scene({ bladeColor, hiltStyle, isOn }) {
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     bloomRef.current.intensity =
-      1.5 +
-      0.1 * (Math.sin(49.0 * t) + Math.sin(60.0 * t) + Math.sin(100.0 * t));
+      2 +
+      0.03 * (Math.sin(49.0 * t) + Math.sin(60.0 * t) + Math.sin(100.0 * t));
   });
 
   return (
@@ -44,8 +44,6 @@ export default function Scene({ bladeColor, hiltStyle, isOn }) {
         backgroundIntensity={0.8} // optional intensity factor (default: 1, only works with three 0.163 and up)
         environmentIntensity={2} // optional intensity factor (default: 1, only works with three 0.163 and up)
         files={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/environment.jpg`}
-        // Ensure the environment is on the default layer
-        onLoad={(env) => env.scene.layers.set(0)}
       />
 
       {/* Lighting */}
@@ -59,12 +57,8 @@ export default function Scene({ bladeColor, hiltStyle, isOn }) {
       />
 
       {/* Reflective floor */}
-      <mesh
-        rotation={[Math.PI / -2, 0, 0]}
-        position={[0, -0.5, 0]}
-        scale={[1000, 1000, 1000]}
-      >
-        <planeGeometry />
+      <mesh rotation={[Math.PI / -2, 0, 0]} position={[0, -0.5, 0]}>
+        <circleGeometry args={[1000]} />
         <MeshReflectorMaterial color={0x909090} resolution={1024} mirror={1} />
       </mesh>
 
@@ -72,24 +66,16 @@ export default function Scene({ bladeColor, hiltStyle, isOn }) {
       <EffectComposer>
         {/* Controls the bloom for the center part of the blade */}
         <Bloom
+          ref={bloomRef}
           intensity={1} // The bloom intensity.
           mipmapBlur={true} // Enables or disables mipmap blur.
           resolutionX={Resolution.AUTO_SIZE} // The horizontal resolution.
           resolutionY={Resolution.AUTO_SIZE} // The vertical resolution.
         />
 
-        {/* Controls the bloom for "aura" or "glow" around the blade */}
-        <Bloom
-          ref={bloomRef}
-          intensity={1.5} // The bloom intensity.
-          mipmapBlur={true} // Enables or disables mipmap blur.
-          resolutionX={Resolution.AUTO_SIZE} // The horizontal resolution.
-          resolutionY={Resolution.AUTO_SIZE} // The vertical resolution.
-        />
+        <Vignette offset={0.1} darkness={1.0} />
 
         <Noise opacity={0.02} />
-
-        <Vignette eskil={false} offset={0.1} darkness={0.9} />
       </EffectComposer>
     </>
   );

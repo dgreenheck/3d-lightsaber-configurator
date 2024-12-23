@@ -40,7 +40,7 @@ export default function App() {
     <main className="h-screen relative">
       {/* React Three Fiber scene */}
       <div className="w-full md:h-full bg-black">
-        <Canvas camera={{ position: [0, 2, 5] }}>
+        <Canvas camera={{ position: [0, 2, 5] }} dpr={window.devicePixelRatio}>
           <color attach="background" args={["#003050"]} />
           <Scene bladeColor={bladeColor} hiltStyle={hiltStyle} isOn={isOn} />
         </Canvas>

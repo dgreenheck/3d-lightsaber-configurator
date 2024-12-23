@@ -15,7 +15,6 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
   const hiltRef = useRef();
   const bladeLightRef = useRef();
 
-  const prevIsOn = useRef(isOn);
   const previousMousePos = useRef({ x: 0, y: 0 });
   const threshold = 30; // Movement threshold to trigger sound
 
@@ -53,7 +52,7 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
       scale.y = Math.max(0, scale.y - closeSpeed);
     }
 
-    bladeLightRef.current.intensity = scale.y * 1000;
+    bladeLightRef.current.intensity = scale.y * 50;
 
     if (bladeRef.current) {
       bladeRef.current.children[0].material.emissiveIntensity =
@@ -84,45 +83,31 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
   useEffect(() => {
     if (!openSound || !humSound || !closeSound) return;
 
-    if (!prevIsOn.current && isOn) {
+    if (isOn) {
       playAudio(openSound);
       currentAudioSource.current = playAudio(humSound, 0.2, true);
-    } else if (prevIsOn.current && !isOn) {
-      if (currentAudioSource.current) {
-        currentAudioSource.current.stop();
-      }
-      currentAudioSource.current = playAudio(closeSound, 1.0, false, () => {
-        currentAudioSource.current = null;
-      });
+    } else {
+      currentAudioSource.current?.stop();
+      currentAudioSource.current = null;
+      playAudio(closeSound, 1.0, false);
     }
-
-    prevIsOn.current = isOn;
   }, [isOn]);
 
-  // Track mouse movement and play sound if threshold is exceeded
-  useFrame((state) => {
-    if (!swingSound || !isOn) return;
+  // Play swing sound on fast mouse movement
+  useFrame(({ pointer }) => {
+    if (!swingSound || !isOn || !isMouseDown.current) return;
 
-    const { pointer } = state; // Normalized mouse position (-1 to 1)
+    const mouseX = pointer.x * window.innerWidth;
+    const deltaX = Math.abs(mouseX - previousMousePos.current.x);
 
-    const currentMousePos = {
-      x: pointer.x * window.innerWidth,
-      y: pointer.y * window.innerHeight,
-    };
-
-    // Calculate movement delta
-    const deltaX = Math.abs(currentMousePos.x - previousMousePos.current.x);
-
-    if (deltaX > threshold && !isSwinging.current && isMouseDown.current) {
+    console.log(deltaX);
+    if (deltaX > threshold && !isSwinging.current) {
       isSwinging.current = true;
       playAudio(swingSound, 0.3);
-      setTimeout(() => {
-        isSwinging.current = false;
-      }, 300);
+      setTimeout(() => (isSwinging.current = false), 300);
     }
 
-    // Update the previous mouse position
-    previousMousePos.current = currentMousePos;
+    previousMousePos.current.x = mouseX;
   });
 
   return (
@@ -140,22 +125,20 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
 
       <pointLight
         ref={bladeLightRef}
-        position={[0, 3, 0]}
+        position={[0, 1.2, 0]}
         color={bladeColor}
-        intensity={1000.0}
-        decay={3}
+        intensity={5.0}
       />
 
-      <group position={[0, 2.5, 0]}>
-        <Sparkles
-          count={100}
-          speed={1}
-          opacity={isOn ? 0.5 : 0}
-          color={0xffffff}
-          scale={[0.3, 3, 0.3]}
-          noise={[10, 10, 10]}
-        />
-      </group>
+      <Sparkles
+        count={100}
+        speed={1}
+        opacity={isOn ? 0.5 : 0}
+        color={0xffffff}
+        scale={[0.3, 3, 0.3]}
+        noise={[10, 10, 10]}
+        position={[0, 2.5, 0]}
+      />
     </group>
   );
 }
