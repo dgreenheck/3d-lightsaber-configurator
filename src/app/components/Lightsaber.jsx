@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useFrame, extend } from "@react-three/fiber";
-import { Sparkles, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { UnrealBloomPass } from "three-stdlib";
 import { loadAudio, playAudio } from "../../utils/audio";
 
@@ -128,16 +128,6 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
         position={[0, 1.2, 0]}
         color={bladeColor}
         intensity={5.0}
-      />
-
-      <Sparkles
-        count={100}
-        speed={1}
-        opacity={isOn ? 0.5 : 0}
-        color={0xffffff}
-        scale={[0.3, 3, 0.3]}
-        noise={[10, 10, 10]}
-        position={[0, 2.5, 0]}
       />
     </group>
   );
