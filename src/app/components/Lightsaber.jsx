@@ -15,8 +15,8 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
   const hiltRef = useRef();
   const bladeLightRef = useRef();
 
-  const previousMousePos = useRef({ x: 0, y: 0 });
-  const threshold = 30; // Movement threshold to trigger sound
+  const previousMousePos = useRef(null);
+  const threshold = 50; // Movement threshold to trigger sound
 
   const [openSound, setOpenSound] = useState(null);
   const [closeSound, setCloseSound] = useState(null);
@@ -28,8 +28,14 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
   const isMouseDown = useRef(false);
 
   useEffect(() => {
-    const handleMouseDown = () => (isMouseDown.current = true);
-    const handleMouseUp = () => (isMouseDown.current = false);
+    const handleMouseDown = (e) => {
+      previousMousePos.current = null;
+      isMouseDown.current = true;
+    };
+    const handleMouseUp = () => {
+      previousMousePos.current = null;
+      isMouseDown.current = false;
+    };
 
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
@@ -98,16 +104,18 @@ export default function Lightsaber({ bladeColor, hiltStyle, isOn }) {
     if (!swingSound || !isOn || !isMouseDown.current) return;
 
     const mouseX = pointer.x * window.innerWidth;
-    const deltaX = Math.abs(mouseX - previousMousePos.current.x);
 
-    console.log(deltaX);
-    if (deltaX > threshold && !isSwinging.current) {
-      isSwinging.current = true;
-      playAudio(swingSound, 0.3);
-      setTimeout(() => (isSwinging.current = false), 300);
+    if (previousMousePos.current !== null) {
+      const deltaX = Math.abs(mouseX - previousMousePos.current);
+      console.log(deltaX);
+      if (deltaX > threshold && !isSwinging.current) {
+        isSwinging.current = true;
+        playAudio(swingSound, 0.3);
+        setTimeout(() => (isSwinging.current = false), 300);
+      }
     }
 
-    previousMousePos.current.x = mouseX;
+    previousMousePos.current = mouseX;
   });
 
   return (

@@ -32,7 +32,7 @@ export default function Scene({ bladeColor, hiltStyle, isOn }) {
     const t = state.clock.getElapsedTime();
     bloomRef.current.intensity =
       2 +
-      0.03 * (Math.sin(49.0 * t) + Math.sin(60.0 * t) + Math.sin(100.0 * t));
+      0.05 * (Math.sin(49.0 * t) + Math.sin(60.0 * t) + Math.sin(100.0 * t));
   });
 
   return (
