@@ -13,6 +13,7 @@ import {
   OrbitControls,
   Environment,
   MeshReflectorMaterial,
+  Box,
 } from "@react-three/drei";
 import Lightsaber from "./Lightsaber";
 import { loadAudio, playAudio } from "@/utils/audio";
@@ -20,23 +21,27 @@ import { loadAudio, playAudio } from "@/utils/audio";
 export default function Scene({ bladeColor, hiltStyle, isOn }) {
   const bloomRef = useRef();
 
-  useEffect(() => {
-    loadAudio(
-      `${process.env.NEXT_PUBLIC_BASE_PATH}/audio/spaceship-ambience.mp3`
-    ).then((sound) => {
-      //playAudio(sound, 0.5);
-    });
-  });
+  // useEffect(() => {
+  //   loadAudio(
+  //     `${process.env.NEXT_PUBLIC_BASE_PATH}/audio/spaceship-ambience.mp3`
+  //   ).then((sound) => {
+  //     //playAudio(sound, 0.5);
+  //   });
+  // });
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     bloomRef.current.intensity =
-      2 +
+      3 +
       0.05 * (Math.sin(49.0 * t) + Math.sin(60.0 * t) + Math.sin(100.0 * t));
   });
 
   return (
     <>
+      {/* <Box position={[0, 1, 0]}>
+        <meshStandardMaterial color="red" />
+      </Box> */}
+
       <Lightsaber bladeColor={bladeColor} hiltStyle={hiltStyle} isOn={isOn} />
 
       <Environment
@@ -45,9 +50,6 @@ export default function Scene({ bladeColor, hiltStyle, isOn }) {
         environmentIntensity={2} // optional intensity factor (default: 1, only works with three 0.163 and up)
         files={`${process.env.NEXT_PUBLIC_BASE_PATH}/images/environment.jpg`}
       />
-
-      {/* Lighting */}
-      <ambientLight intensity={2.0} />
 
       {/* Camera controls */}
       <OrbitControls
@@ -59,7 +61,7 @@ export default function Scene({ bladeColor, hiltStyle, isOn }) {
       {/* Reflective floor */}
       <mesh rotation={[Math.PI / -2, 0, 0]} position={[0, -0.5, 0]}>
         <circleGeometry args={[1000]} />
-        <MeshReflectorMaterial color={0x909090} resolution={1024} mirror={1} />
+        <MeshReflectorMaterial color={0x505050} resolution={1024} mirror={1} />
       </mesh>
 
       {/* Post-processing */}
@@ -67,13 +69,13 @@ export default function Scene({ bladeColor, hiltStyle, isOn }) {
         {/* Controls the bloom for the center part of the blade */}
         <Bloom
           ref={bloomRef}
-          intensity={1} // The bloom intensity.
-          mipmapBlur={true} // Enables or disables mipmap blur.
-          resolutionX={Resolution.AUTO_SIZE} // The horizontal resolution.
-          resolutionY={Resolution.AUTO_SIZE} // The vertical resolution.
+          // intensity={2} this is set dynamically in useFrame() above
+          mipmapBlur={true}
+          resolutionX={Resolution.AUTO_SIZE}
+          resolutionY={Resolution.AUTO_SIZE}
         />
 
-        <Vignette offset={0.1} darkness={1.0} />
+        <Vignette offset={0.05} darkness={0.7} />
 
         <Noise opacity={0.02} />
       </EffectComposer>
